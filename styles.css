@@ -50,6 +50,139 @@ button {
     radial-gradient(circle at 52% 43%, rgba(34, 231, 236, 0.17), transparent 22%),
     radial-gradient(circle at 16% 32%, rgba(145, 91, 255, 0.18), transparent 34%),
     linear-gradient(180deg, #090927 0%, #10133a 43%, #15354f 70%, #091a35 100%);
+  transition: background 1100ms ease;
+}
+
+.world .sky-stars,
+.world .moon,
+.world .aurora,
+.world .mountains,
+.world .relay-wave,
+.world .horizon-glow {
+  transition: background 1100ms ease, box-shadow 1100ms ease, opacity 1100ms ease, filter 1100ms ease;
+}
+
+.world.zone-1 {
+  background:
+    radial-gradient(circle at 53% 43%, rgba(255, 76, 140, 0.3), transparent 24%),
+    radial-gradient(circle at 16% 26%, rgba(145, 91, 255, 0.3), transparent 34%),
+    linear-gradient(180deg, #100928 0%, #291044 43%, #5b214f 70%, #211032 100%);
+}
+
+.world.zone-1 .moon {
+  background: radial-gradient(circle at 48% 43%, #fff5fb 0 17%, #ff76b2 34%, rgba(255, 76, 140, 0.12) 68%);
+  box-shadow: 0 0 48px rgba(255, 76, 140, 0.38), 0 0 140px rgba(255, 76, 140, 0.17);
+}
+
+.world.zone-1 .aurora-a {
+  background: rgba(255, 76, 140, 0.2);
+}
+
+.world.zone-1 .aurora-b {
+  background: rgba(145, 91, 255, 0.28);
+}
+
+.world.zone-1 .mountains.far {
+  background: rgba(61, 27, 72, 0.8);
+}
+
+.world.zone-1 .mountains.near,
+.world.zone-1 .wave-front {
+  background: #1c102f;
+}
+
+.world.zone-1 .wave-back {
+  background: #452046;
+}
+
+.world.zone-1 .wave-mid {
+  background: #32163b;
+}
+
+.world.zone-1 .horizon-glow {
+  background: linear-gradient(90deg, transparent, rgba(255, 76, 140, 0.4), transparent);
+}
+
+.world.zone-2 {
+  background:
+    radial-gradient(circle at 52% 40%, rgba(34, 231, 236, 0.32), transparent 27%),
+    radial-gradient(circle at 78% 24%, rgba(62, 163, 255, 0.22), transparent 32%),
+    linear-gradient(180deg, #040f2d 0%, #062942 44%, #08717a 74%, #061c36 100%);
+}
+
+.world.zone-2 .moon {
+  background: radial-gradient(circle at 48% 43%, #ffffff 0 17%, #22e7ec 34%, rgba(34, 231, 236, 0.12) 68%);
+  box-shadow: 0 0 56px rgba(34, 231, 236, 0.56), 0 0 160px rgba(34, 231, 236, 0.25);
+}
+
+.world.zone-2 .aurora-a {
+  background: rgba(34, 231, 236, 0.32);
+}
+
+.world.zone-2 .aurora-b {
+  background: rgba(44, 133, 255, 0.23);
+}
+
+.world.zone-2 .mountains.far {
+  background: rgba(7, 55, 74, 0.8);
+}
+
+.world.zone-2 .mountains.near,
+.world.zone-2 .wave-front {
+  background: #041b32;
+}
+
+.world.zone-2 .wave-back {
+  background: #074553;
+}
+
+.world.zone-2 .wave-mid {
+  background: #06333f;
+}
+
+.world.zone-2 .horizon-glow {
+  background: linear-gradient(90deg, transparent, rgba(34, 231, 236, 0.48), transparent);
+}
+
+.world.zone-3 {
+  background:
+    radial-gradient(circle at 52% 42%, rgba(255, 210, 74, 0.28), transparent 25%),
+    radial-gradient(circle at 23% 30%, rgba(255, 111, 71, 0.2), transparent 34%),
+    linear-gradient(180deg, #17102d 0%, #3c2242 42%, #a74a4d 70%, #4b2536 100%);
+}
+
+.world.zone-3 .moon {
+  background: radial-gradient(circle at 48% 43%, #fffdf2 0 17%, #ffd24a 34%, rgba(255, 210, 74, 0.12) 68%);
+  box-shadow: 0 0 52px rgba(255, 210, 74, 0.5), 0 0 150px rgba(255, 128, 71, 0.25);
+}
+
+.world.zone-3 .aurora-a {
+  background: rgba(255, 210, 74, 0.24);
+}
+
+.world.zone-3 .aurora-b {
+  background: rgba(255, 76, 140, 0.18);
+}
+
+.world.zone-3 .mountains.far {
+  background: rgba(85, 39, 55, 0.78);
+}
+
+.world.zone-3 .mountains.near,
+.world.zone-3 .wave-front {
+  background: #28172b;
+}
+
+.world.zone-3 .wave-back {
+  background: #633044;
+}
+
+.world.zone-3 .wave-mid {
+  background: #47233a;
+}
+
+.world.zone-3 .horizon-glow {
+  background: linear-gradient(90deg, transparent, rgba(255, 210, 74, 0.45), transparent);
 }
 
 .sky-stars {
@@ -858,8 +991,10 @@ button {
   left: 50%;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 9px 14px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 108px;
+  padding: 12px 18px 10px;
   border: 1px solid rgba(34, 231, 236, 0.32);
   border-radius: 999px;
   transform: translateX(-50%);
@@ -876,9 +1011,29 @@ button {
 }
 
 .launch-countdown strong {
-  min-width: 27px;
+  min-width: 40px;
   color: #fff;
-  font-size: 22px;
+  font-family: var(--display);
+  font-size: 42px;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(34, 231, 236, 0.65);
+  animation: countdownPulse 1s ease-out infinite;
+}
+
+@keyframes countdownPulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(1.14);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
 }
 
 .ai-feed {

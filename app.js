@@ -32,10 +32,17 @@ const RANKS = [
   { min: 4, name: "C" },
   { min: 0, name: "D" }
 ];
+const ZONES = [
+  { className: "zone-0", name: "MIDNIGHT LINK" },
+  { className: "zone-1", name: "MAGENTA STORM" },
+  { className: "zone-2", name: "CYAN SURGE" },
+  { className: "zone-3", name: "GOLDEN DAWN" },
+];
 
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
 const elements = {
+  world: document.querySelector("#world"),
   startScreen: document.querySelector("#startScreen"),
   hud: document.querySelector("#hud"),
   score: document.querySelector("#score"),
@@ -132,8 +139,9 @@ const state = {
   nextLanding: 1,
   checkedLanding: 0,
   runtime: 0,
-  launchDuration: 1.5,
+  launchDuration: 3,
   launchDelay: 0,
+  zone: 0,
   lastFrame: 0,
   duration: MODES.relay.duration,
   baseDuration: MODES.relay.duration,
@@ -324,6 +332,13 @@ function setScore() {
   elements.rivalScore.textContent = String(state.aiScore);
 }
 
+function applyZone(score) {
+  const zone = Math.floor(score / 10) % ZONES.length;
+  ZONES.forEach((entry) => elements.world.classList.remove(entry.className));
+  elements.world.classList.add(ZONES[zone].className);
+  state.zone = zone;
+}
+
 function renderLeaderboard() {
   elements.leaderboardList.innerHTML = "";
   if (state.leaderboard.length === 0) {
@@ -425,18 +440,19 @@ function beginGame() {
   state.trail = [];
   state.flash = 0;
   getPad(0);
+  applyZone(0);
   elements.startScreen.classList.remove("active");
   elements.hud.classList.remove("hidden");
   elements.result.classList.add("hidden");
   elements.briefing.classList.add("hidden");
-  elements.countdownValue.textContent = state.launchDuration.toFixed(1);
+  elements.countdownValue.textContent = String(state.launchDuration);
   elements.launchCountdown.classList.remove("hidden");
   elements.rivalBoard.classList.toggle("hidden", state.variant !== "duel");
   elements.rivalState.classList.remove("miss");
   elements.rivalState.textContent = "SYNC";
   setAiMessage(state.variant === "duel"
-    ? "AI подключён. Настрой первую башню: старт через 1.5 сек."
-    : "Канал открыт. Настрой первую башню: старт через 1.5 сек.");
+    ? "AI подключён. Настрой первую башню до конца отсчёта."
+    : "Канал открыт. Настрой первую башню до конца отсчёта.");
   updateSignal();
   setScore();
   playTone("begin");
@@ -452,6 +468,7 @@ function goToMenu() {
   state.pads = new Map();
   state.ballColor = 0;
   getPad(0).color = 0;
+  applyZone(0);
   elements.startScreen.classList.add("active");
   elements.hud.classList.add("hidden");
   elements.result.classList.add("hidden");
@@ -534,9 +551,14 @@ function testLanding(index) {
   if (state.score === 10) {
     state.speedBoosted = true;
     state.duration = state.baseDuration * 0.76;
-    setAiMessage("Перегрузка после 10 башен: поток ускорен. Держи ритм!");
+    applyZone(state.score);
+    setAiMessage("MAGENTA STORM: после 10 башен поток ускорен. Держи ритм!");
     playTone("boost");
     startMusic();
+  } else if (state.score > 0 && state.score % 10 === 0) {
+    applyZone(state.score);
+    setAiMessage(`${ZONES[state.zone].name}: среда перестроена после ${state.score} башен.`);
+    playTone("boost");
   } else if (AI_MESSAGES[state.score]) {
     setAiMessage(AI_MESSAGES[state.score]);
   } else if (state.score % 5 === 0) {
@@ -619,7 +641,7 @@ function update(delta) {
     if (state.launchDelay > 0) {
       state.launchDelay = Math.max(0, state.launchDelay - delta);
       state.runtime = -(state.launchDelay / state.launchDuration);
-      elements.countdownValue.textContent = state.launchDelay.toFixed(1);
+      elements.countdownValue.textContent = String(Math.max(1, Math.ceil(state.launchDelay)));
       if (state.launchDelay === 0) {
         elements.launchCountdown.classList.add("hidden");
         state.checkedLanding = 0;
