@@ -12,7 +12,7 @@ Play online: [https://b1rzhaan.github.io/neon-pulse/](https://b1rzhaan.github.io
 
 - Solo run and AI rival mode
 - Three speed levels with acceleration after 10 successful towers
-- A 3-2-1 opening countdown and evolving background every 10 towers
+- An audible 3-2-1 opening countdown and evolving background every 10 towers
 - Mobile controls and responsive HUD
 - Custom menu soundtrack, three rotating in-game tracks, and gameplay sounds
 - Local top-5 rating

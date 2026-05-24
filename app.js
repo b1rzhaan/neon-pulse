@@ -149,6 +149,7 @@ const state = {
   runtime: 0,
   launchDuration: 3,
   launchDelay: 0,
+  countdownNumber: 0,
   zone: 0,
   lastFrame: 0,
   duration: MODES.relay.duration,
@@ -229,7 +230,7 @@ function playTone(kind) {
     rotate: [360, 0.04, "triangle"],
     land: [740, 0.07, "sine"],
     fail: [118, 0.52, "sawtooth"],
-    begin: [530, 0.14, "sine"],
+    countdown: [440, 0.12, "square"],
     boost: [980, 0.25, "triangle"]
   };
   const setup = tones[kind];
@@ -294,7 +295,7 @@ function pickGameTrack() {
 }
 
 function startMusic() {
-  if ((!state.running && !state.pausedForRules) || !state.sound) return;
+  if (state.launchDelay > 0 || (!state.running && !state.pausedForRules) || !state.sound) return;
   setMusicTrack(pickGameTrack(), "game", 0.36);
   if (state.pausedForRules) pauseMusic();
 }
@@ -444,6 +445,7 @@ function beginGame() {
   state.checkedLanding = -1;
   state.runtime = -1;
   state.launchDelay = state.launchDuration;
+  state.countdownNumber = state.launchDuration;
   state.pads = new Map();
   state.particles = [];
   state.trail = [];
@@ -464,8 +466,7 @@ function beginGame() {
     : "Канал открыт. Настрой первую башню до конца отсчёта.");
   updateSignal();
   setScore();
-  playTone("begin");
-  startMusic();
+  playTone("countdown");
 }
 
 function goToMenu() {
@@ -650,11 +651,17 @@ function update(delta) {
     if (state.launchDelay > 0) {
       state.launchDelay = Math.max(0, state.launchDelay - delta);
       state.runtime = -(state.launchDelay / state.launchDuration);
-      elements.countdownValue.textContent = String(Math.max(1, Math.ceil(state.launchDelay)));
+      const countdownNumber = Math.max(1, Math.ceil(state.launchDelay));
+      if (countdownNumber !== state.countdownNumber) {
+        state.countdownNumber = countdownNumber;
+        elements.countdownValue.textContent = String(countdownNumber);
+        playTone("countdown");
+      }
       if (state.launchDelay === 0) {
         elements.launchCountdown.classList.add("hidden");
         state.checkedLanding = 0;
         testLanding(0);
+        if (state.running) startMusic();
       }
     } else {
       const previous = Math.floor(state.runtime);
