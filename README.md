@@ -6,6 +6,8 @@ to the sphere's color.
 
 ![NEON PULSE logo](./assets/neon-pulse-mark.png)
 
+Play online: [https://b1rzhaan.github.io/neon-pulse/](https://b1rzhaan.github.io/neon-pulse/)
+
 ## Features
 
 - Solo run and AI rival mode
