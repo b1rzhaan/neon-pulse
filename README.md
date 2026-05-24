@@ -1,8 +1,10 @@
-# CHROMA//RELAY
+# NEON PULSE
 
 Neon web arcade inspired by the classic Coloron mechanic. A memory sphere jumps
 between signal towers; before each landing, the player must tune the next tower
 to the sphere's color.
+
+![NEON PULSE logo](./assets/neon-pulse-mark.png)
 
 ## Features
 
@@ -27,7 +29,7 @@ This is a static web project. Open `index.html` through any static web server.
 python -m http.server 4180
 ```
 
-Then open `http://127.0.0.1:4180/chroma-relay/`.
+Then open `http://127.0.0.1:4180/neon-pulse/`.
 
 ## AI-Assisted Process
 

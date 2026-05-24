@@ -8,10 +8,11 @@
     />
     <meta
       name="description"
-      content="CHROMA//RELAY - цветная аркада о передаче памяти AI через прыгающие сигнальные башни."
+      content="NEON PULSE - неоновая аркада о цветной сфере, пульсе и прыгающих сигнальных башнях."
     />
     <meta name="theme-color" content="#201347" />
-    <title>CHROMA//RELAY | Aurora Link</title>
+    <title>NEON PULSE | Signal Arcade</title>
+    <link rel="icon" type="image/png" href="./assets/neon-pulse-mark.png" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -36,9 +37,9 @@
     </div>
 
     <header class="topbar">
-      <a class="brand" href="#" aria-label="CHROMA RELAY на главную">
-        <span class="brand-dot"></span>
-        CHROMA<span>//</span>RELAY
+      <a class="brand" href="#" aria-label="NEON PULSE на главную">
+        <img class="brand-mark" src="./assets/neon-pulse-mark.png" alt="" />
+        NEON<span>//</span>PULSE
       </a>
       <div class="top-actions">
         <button class="quiet" id="rulesButton" type="button">Как играть</button>
@@ -50,9 +51,10 @@
       <canvas id="gameCanvas" width="1280" height="760" aria-label="Игровое поле с прыгающей сферой и цветовыми башнями"></canvas>
 
       <section class="start-screen active" id="startScreen" aria-labelledby="title">
+        <img class="hero-logo" src="./assets/neon-pulse-mark.png" alt="" />
         <h1 id="title">
-          <span>C</span><span>H</span><span>R</span><span>O</span><span>M</span><span>A</span>
-          <b>//RELAY</b>
+          <span>N</span><span>E</span><span>O</span><span>N</span>
+          <b>PULSE</b>
         </h1>
         <p class="tagline">
           Проведи сферу памяти через сияющие ретрансляторы.<br />
@@ -148,7 +150,7 @@
           <span id="rivalState">SYNC</span>
         </div>
         <div class="ai-feed" id="aiFeed" aria-live="polite">
-          <small>RELAY AI</small>
+          <small>PULSE AI</small>
           <p id="aiMessage">Связь настроена. Ожидаю первый прыжок.</p>
         </div>
         <p class="control-tip">Тапни по башне или используй <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> для следующей посадки</p>
@@ -170,7 +172,7 @@
       <div class="briefing-card">
         <button class="close" id="closeRulesButton" type="button" aria-label="Закрыть">×</button>
         <p class="eyebrow">MISSION BRIEFING</p>
-        <h2 id="briefTitle">Передача памяти AURORA-3</h2>
+        <h2 id="briefTitle">Запуск ядра PULSE-9</h2>
         <p class="brief-mode" id="briefMode">Соло: продержись как можно дольше и поставь рекорд.</p>
         <div class="brief-steps">
           <article>

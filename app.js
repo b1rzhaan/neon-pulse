@@ -13,9 +13,17 @@ const MODES = {
 const AI_MESSAGES = {
   1: "Первый ретранслятор принят. Память снова движется.",
   4: "Четыре узла синхронизированы. Я слышу северный маяк.",
-  8: "Пакет памяти раскрывается: моё имя AURORA-3.",
+  8: "Пакет памяти раскрывается: моё имя PULSE-9.",
   14: "Связь почти стабильна. Не сбивай ритм.",
   22: "Ты ведёшь сигнал дальше любой расчётной дистанции."
+};
+const STORAGE = {
+  best: "neonPulseBest",
+  pilot: "neonPulsePilot",
+  scores: "neonPulseScores",
+  legacyBest: "chromaRelayBest",
+  legacyPilot: "chromaRelayPilot",
+  legacyScores: "chromaRelayScores",
 };
 const RANKS = [
   { min: 24, name: "S" },
@@ -64,7 +72,7 @@ const elements = {
 
 function loadBest() {
   try {
-    return Number(localStorage.getItem("chromaRelayBest") || 0);
+    return Number(localStorage.getItem(STORAGE.best) || localStorage.getItem(STORAGE.legacyBest) || 0);
   } catch (error) {
     return 0;
   }
@@ -72,7 +80,7 @@ function loadBest() {
 
 function saveBest(value) {
   try {
-    localStorage.setItem("chromaRelayBest", String(value));
+    localStorage.setItem(STORAGE.best, String(value));
   } catch (error) {
     // Private browsing can block storage; the current run still works.
   }
@@ -80,7 +88,7 @@ function saveBest(value) {
 
 function loadPilot() {
   try {
-    return localStorage.getItem("chromaRelayPilot") || "PLAYER";
+    return localStorage.getItem(STORAGE.pilot) || localStorage.getItem(STORAGE.legacyPilot) || "PLAYER";
   } catch (error) {
     return "PLAYER";
   }
@@ -88,7 +96,7 @@ function loadPilot() {
 
 function savePilot(value) {
   try {
-    localStorage.setItem("chromaRelayPilot", value);
+    localStorage.setItem(STORAGE.pilot, value);
   } catch (error) {
     // The current session can still use the typed callsign.
   }
@@ -96,7 +104,7 @@ function savePilot(value) {
 
 function loadLeaderboard() {
   try {
-    const stored = JSON.parse(localStorage.getItem("chromaRelayScores") || "[]");
+    const stored = JSON.parse(localStorage.getItem(STORAGE.scores) || localStorage.getItem(STORAGE.legacyScores) || "[]");
     return Array.isArray(stored) ? stored : [];
   } catch (error) {
     return [];
@@ -105,7 +113,7 @@ function loadLeaderboard() {
 
 function saveLeaderboard(entries) {
   try {
-    localStorage.setItem("chromaRelayScores", JSON.stringify(entries));
+    localStorage.setItem(STORAGE.scores, JSON.stringify(entries));
   } catch (error) {
     // Results still show after a run if persistent storage is unavailable.
   }
@@ -596,7 +604,7 @@ function finishDuel() {
   elements.resultLabel.textContent = "RACE COMPLETE";
   elements.resultTitle.textContent = won ? "Ты обогнал AI" : "Идеальная ничья";
   elements.resultCopy.textContent = won
-    ? `AURORA-3 выбирает твою линию: ${state.score} против ${state.aiScore}. AI ошибся ${state.aiMisses} раз.`
+    ? `PULSE-9 выбирает твою линию: ${state.score} против ${state.aiScore}. AI ошибся ${state.aiMisses} раз.`
     : `Ты и AI синхронизировали по ${state.score} башен. Это редкая идеальная передача.`;
   elements.finalScore.textContent = String(state.score);
   elements.finalBest.textContent = String(state.best);

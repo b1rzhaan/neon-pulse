@@ -274,12 +274,11 @@ button {
   color: var(--cyan);
 }
 
-.brand-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--cyan), var(--violet));
-  box-shadow: 0 0 22px var(--cyan);
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(34, 231, 236, 0.55));
 }
 
 .top-actions {
@@ -334,6 +333,14 @@ button {
 
 .start-screen.active {
   display: flex;
+}
+
+.hero-logo {
+  width: clamp(116px, 13vw, 160px);
+  height: clamp(116px, 13vw, 160px);
+  margin: 0 0 13px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 29px rgba(34, 231, 236, 0.28));
 }
 
 .eyebrow {
@@ -1137,6 +1144,11 @@ kbd {
     font-size: 14px;
   }
 
+  .brand-mark {
+    width: 25px;
+    height: 25px;
+  }
+
   #rulesButton {
     display: none;
   }
@@ -1158,6 +1170,12 @@ kbd {
 
   .start-screen h1 {
     font-size: clamp(42px, 16vw, 56px);
+  }
+
+  .hero-logo {
+    width: 106px;
+    height: 106px;
+    margin-bottom: 9px;
   }
 
   .start-screen h1 b {
