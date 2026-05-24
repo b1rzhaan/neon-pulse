@@ -16,7 +16,7 @@ Play online: [https://b1rzhaan.github.io/neon-pulse/](https://b1rzhaan.github.io
 - Mobile controls and responsive HUD
 - Custom menu soundtrack, three rotating in-game tracks, and gameplay sounds
 - Local top-5 rating
-- Animated tower signals, falling matched towers, and a reactive night scene
+- Animated tower signals, glass-shatter matched towers, and a reactive night scene
 
 ## Controls
 

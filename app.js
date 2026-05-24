@@ -314,7 +314,8 @@ function getPad(index) {
       index,
       color: Math.floor(Math.random() * COLORS.length),
       burst: 0,
-      fall: -1,
+      shatter: -1,
+      shards: [],
       activated: false,
       effect: index % 3
     });
@@ -545,6 +546,49 @@ function addParticles(x, y, selectedColor, amount) {
   }
 }
 
+function shatterPillar(pad) {
+  const width = Math.max(74, Math.min(state.padSpacing - 24, 150));
+  const height = window.innerHeight - state.topY + 20;
+  const columns = window.innerWidth <= 700 ? 3 : 4;
+  const rows = Math.max(3, Math.min(7, Math.ceil(height / 46)));
+  const cellWidth = width / columns;
+  const cellHeight = height / rows;
+  const left = -width / 2;
+  pad.shards = [];
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const x = left + column * cellWidth;
+      const y = row * cellHeight;
+      const splitDown = (row + column) % 2 === 0;
+      const pieces = splitDown
+        ? [
+          [[x, y], [x + cellWidth, y], [x + cellWidth, y + cellHeight]],
+          [[x, y], [x + cellWidth, y + cellHeight], [x, y + cellHeight]],
+        ]
+        : [
+          [[x, y], [x + cellWidth, y], [x, y + cellHeight]],
+          [[x + cellWidth, y], [x + cellWidth, y + cellHeight], [x, y + cellHeight]],
+        ];
+      pieces.forEach((points) => {
+        const centerX = points.reduce((sum, point) => sum + point[0], 0) / points.length;
+        const centerY = points.reduce((sum, point) => sum + point[1], 0) / points.length;
+        const horizontal = centerX / Math.max(width / 2, 1);
+        pad.shards.push({
+          points: points.map((point) => [point[0] - centerX, point[1] - centerY]),
+          x: centerX,
+          y: centerY,
+          vx: horizontal * (70 + Math.random() * 90) + (Math.random() - 0.5) * 46,
+          vy: -72 - Math.random() * 125 + row * 10,
+          rotation: 0,
+          spin: (Math.random() - 0.5) * 8,
+          glint: 0.35 + Math.random() * 0.6,
+        });
+      });
+    }
+  }
+  pad.shatter = 0;
+}
+
 function testLanding(index) {
   const pad = getPad(index);
   advanceRival();
@@ -556,7 +600,7 @@ function testLanding(index) {
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
   pad.burst = 1.3;
-  pad.fall = 0;
+  shatterPillar(pad);
   addParticles(state.ballX, state.topY - 8, state.ballColor, 16);
   playTone("land");
   if (state.score === 10) {
@@ -684,7 +728,15 @@ function update(delta) {
   state.particles = state.particles.filter((particle) => particle.life > 0);
   state.pads.forEach((pad) => {
     pad.burst = Math.max(0, pad.burst - delta * 3);
-    if (pad.fall >= 0) pad.fall += delta * 2.35;
+    if (pad.shatter >= 0) {
+      pad.shatter += delta;
+      pad.shards.forEach((shard) => {
+        shard.x += shard.vx * delta;
+        shard.y += shard.vy * delta;
+        shard.vy += 550 * delta;
+        shard.rotation += shard.spin * delta;
+      });
+    }
   });
   state.trail.forEach((point) => {
     point.life -= delta * 4.1;
@@ -741,19 +793,51 @@ function drawPillarSignal(x, top, width, height, pad, selected) {
   ctx.restore();
 }
 
+function drawShatteredPillar(x, pad, selected) {
+  const fade = Math.max(0, 1 - pad.shatter / 0.9);
+  if (fade <= 0) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.shadowColor = selected.glow;
+  ctx.shadowBlur = 14;
+  pad.shards.forEach((shard) => {
+    ctx.save();
+    ctx.translate(x + shard.x, state.topY + shard.y);
+    ctx.rotate(shard.rotation);
+    ctx.globalAlpha = fade * (0.68 + shard.glint * 0.28);
+    ctx.fillStyle = selected.value;
+    ctx.beginPath();
+    shard.points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point[0], point[1]);
+      } else {
+        ctx.lineTo(point[0], point[1]);
+      }
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = fade * shard.glint;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
 function drawPillar(x, pad, width) {
-  const fall = pad.fall < 0 ? 0 : Math.min(1, pad.fall);
-  if (fall >= 1) return;
-  const collapse = 1 - Math.pow(1 - fall, 2);
-  const top = state.topY + collapse * (state.padHeight * 0.92);
   const selected = color(pad.color);
+  if (pad.shatter >= 0) {
+    drawShatteredPillar(x, pad, selected);
+    return;
+  }
+  const top = state.topY;
   const gradient = ctx.createLinearGradient(0, top, 0, window.innerHeight);
   gradient.addColorStop(0, selected.value);
   gradient.addColorStop(0.68, selected.value);
   gradient.addColorStop(1, "rgba(18, 13, 49, 0.55)");
   ctx.save();
   ctx.shadowColor = selected.glow;
-  ctx.globalAlpha = 1 - collapse * 0.64;
   ctx.shadowBlur = 13 + pad.burst * 22;
   ctx.fillStyle = gradient;
   ctx.beginPath();
