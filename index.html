@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="CHROMA//RELAY - цветная аркада о передаче памяти AI через прыгающие сигнальные башни."
+    />
+    <meta name="theme-color" content="#201347" />
+    <title>CHROMA//RELAY | Aurora Link</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="world" aria-hidden="true">
+      <div class="sky-stars"></div>
+      <div class="moon">
+        <span></span>
+      </div>
+      <div class="aurora aurora-a"></div>
+      <div class="aurora aurora-b"></div>
+      <div class="drift-cloud cloud-a"></div>
+      <div class="drift-cloud cloud-b"></div>
+      <div class="mountains far"></div>
+      <div class="mountains near"></div>
+      <div class="relay-waves">
+        <div class="relay-wave wave-back"></div>
+        <div class="relay-wave wave-mid"></div>
+        <div class="relay-wave wave-front"></div>
+      </div>
+      <div class="horizon-glow"></div>
+      <div class="scanlines"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="CHROMA RELAY на главную">
+        <span class="brand-dot"></span>
+        CHROMA<span>//</span>RELAY
+      </a>
+      <div class="top-actions">
+        <button class="quiet" id="rulesButton" type="button">Как играть</button>
+        <button class="quiet" id="soundButton" type="button" aria-pressed="true">Музыка: вкл</button>
+      </div>
+    </header>
+
+    <main class="app">
+      <canvas id="gameCanvas" width="1280" height="760" aria-label="Игровое поле с прыгающей сферой и цветовыми башнями"></canvas>
+
+      <section class="start-screen active" id="startScreen" aria-labelledby="title">
+        <h1 id="title">
+          <span>C</span><span>H</span><span>R</span><span>O</span><span>M</span><span>A</span>
+          <b>//RELAY</b>
+        </h1>
+        <p class="tagline">
+          Проведи сферу памяти через сияющие ретрансляторы.<br />
+          Один неверный цвет, и связь со станцией оборвётся.
+        </p>
+        <div class="start-actions">
+          <button class="play-button" id="startButton" type="button">
+            Играть соло <span>→</span>
+          </button>
+          <button class="duel-button" id="duelButton" type="button">
+            Против AI <b>NEW</b>
+          </button>
+          <div class="mode" id="modeControl">
+            <span>Скорость</span>
+            <button
+              class="mode-trigger"
+              id="modeTrigger"
+              type="button"
+              aria-label="Скорость передачи"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <span id="modeValue">Поток</span>
+              <i></i>
+            </button>
+            <div class="mode-menu hidden" id="modeMenu" role="listbox" aria-label="Скорость передачи">
+              <button type="button" role="option" data-mode="training" aria-selected="false">
+                <strong>Обучение</strong><small>x0.8</small>
+              </button>
+              <button class="selected" type="button" role="option" data-mode="relay" aria-selected="true">
+                <strong>Поток</strong><small>x1.0</small>
+              </button>
+              <button type="button" role="option" data-mode="overdrive" aria-selected="false">
+                <strong>Overdrive</strong><small>x1.3</small>
+              </button>
+            </div>
+          </div>
+          <label class="pilot">
+            <span>Позывной</span>
+            <input id="pilotName" maxlength="12" value="PLAYER" aria-label="Имя игрока для рейтинга" />
+          </label>
+        </div>
+
+        <div class="landing-bottom">
+          <div class="how-grid">
+            <article>
+              <div class="demo-orb"></div>
+              <p>Сфера прыгает и меняет цвет после каждого удачного сигнала.</p>
+            </article>
+            <article>
+              <div class="demo-pillars">
+                <i class="red"></i><i class="yellow"></i><i class="purple"></i>
+              </div>
+              <p>Нажимай на башни, чтобы переключать их частоту.</p>
+            </article>
+            <article>
+              <div class="demo-match">
+                <div></div><i></i>
+              </div>
+              <p>В момент посадки цвет сферы и башни должен совпасть.</p>
+            </article>
+          </div>
+          <aside class="leaderboard">
+            <div class="leaderboard-title">
+              <span>LOCAL RANKING</span>
+              <strong>ТОП-5</strong>
+            </div>
+            <ol id="leaderboardList">
+              <li class="empty">Сыграй первую передачу</li>
+            </ol>
+          </aside>
+        </div>
+      </section>
+
+      <section class="hud hidden" id="hud" aria-label="Игровая статистика">
+        <div class="score-board">
+          <div><small>LINK SCORE</small><strong id="score">0</strong></div>
+          <div><small>BEST</small><strong id="best">0</strong></div>
+          <div><small>SPEED</small><strong id="speed">x1.0</strong></div>
+        </div>
+        <div class="next-signal">
+          <small>ТЕКУЩАЯ СФЕРА</small>
+          <span id="signalChip"></span>
+          <strong id="signalName">CYAN</strong>
+        </div>
+        <div class="launch-countdown hidden" id="launchCountdown">
+          <small>LINK START</small>
+          <strong id="countdownValue">1.5</strong>
+        </div>
+        <div class="rival-board hidden" id="rivalBoard">
+          <small>AI RIVAL</small>
+          <strong id="rivalScore">0</strong>
+          <span id="rivalState">SYNC</span>
+        </div>
+        <div class="ai-feed" id="aiFeed" aria-live="polite">
+          <small>RELAY AI</small>
+          <p id="aiMessage">Связь настроена. Ожидаю первый прыжок.</p>
+        </div>
+        <p class="control-tip">Тапни по башне или используй <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> для следующей посадки</p>
+        <div class="touch-controls" id="touchControls" aria-label="Установить цвет следующей башни">
+          <button class="cyan" type="button" data-color="0" aria-label="Следующая башня cyan">
+            <i></i><span>CYAN</span>
+          </button>
+          <button class="amber" type="button" data-color="1" aria-label="Следующая башня amber">
+            <i></i><span>AMBER</span>
+          </button>
+          <button class="violet" type="button" data-color="2" aria-label="Следующая башня violet">
+            <i></i><span>VIOLET</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal-backdrop hidden" id="briefingModal" role="dialog" aria-modal="true" aria-labelledby="briefTitle">
+      <div class="briefing-card">
+        <button class="close" id="closeRulesButton" type="button" aria-label="Закрыть">×</button>
+        <p class="eyebrow">MISSION BRIEFING</p>
+        <h2 id="briefTitle">Передача памяти AURORA-3</h2>
+        <p class="brief-mode" id="briefMode">Соло: продержись как можно дольше и поставь рекорд.</p>
+        <div class="brief-steps">
+          <article>
+            <strong>01</strong>
+            <h3>Следи за сферой</h3>
+            <p>Она меняет цвет сразу после успешной посадки.</p>
+          </article>
+          <article>
+            <strong>02</strong>
+            <h3>Крути башни</h3>
+            <p>Нажатие меняет цвет: cyan, amber, violet.</p>
+          </article>
+          <article>
+            <strong>03</strong>
+            <h3>Не ошибись</h3>
+            <p>Совпадение даёт очко. Ошибка мгновенно рвёт канал.</p>
+          </article>
+        </div>
+        <button class="play-button brief-launch" id="launchButton" type="button">
+          Запустить сферу <span>→</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="result-card">
+        <div class="lost-orb" id="lostOrb"></div>
+        <p class="eyebrow" id="resultLabel">SIGNAL LOST</p>
+        <h2 id="resultTitle">Канал оборван</h2>
+        <p class="result-copy" id="resultCopy"></p>
+        <div class="final-stats">
+          <div><small>Очки</small><strong id="finalScore">0</strong></div>
+          <div><small>Рекорд</small><strong id="finalBest">0</strong></div>
+          <div><small id="thirdResultLabel">Ранг</small><strong id="finalRank">D</strong></div>
+        </div>
+        <div class="result-actions">
+          <button class="play-button" id="againButton" type="button">Ещё раз <span>→</span></button>
+          <button class="outline-button" id="menuButton" type="button">Меню</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
