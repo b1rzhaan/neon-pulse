@@ -14,7 +14,7 @@ Play online: [https://b1rzhaan.github.io/neon-pulse/](https://b1rzhaan.github.io
 - Three speed levels with acceleration after 10 successful towers
 - A 3-2-1 opening countdown and evolving background every 10 towers
 - Mobile controls and responsive HUD
-- Synthesized background music and gameplay sounds
+- Custom menu soundtrack, three rotating in-game tracks, and gameplay sounds
 - Local top-5 rating
 - Animated tower signals, falling matched towers, and a reactive night scene
 

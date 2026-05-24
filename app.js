@@ -38,6 +38,14 @@ const ZONES = [
   { className: "zone-2", name: "CYAN SURGE" },
   { className: "zone-3", name: "GOLDEN DAWN" },
 ];
+const MUSIC = {
+  menu: "./%D0%93%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0%D0%9C%D0%A3%D0%97.mp3",
+  game: [
+    "./%D1%84%D0%BE%D0%BD1.mp3",
+    "./%D1%84%D0%BE%D0%BD2.mp3",
+    "./%D1%84%D0%BE%D0%BD3.mp3",
+  ],
+};
 
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -163,10 +171,9 @@ const state = {
   flash: 0,
   sound: true,
   audio: null,
-  musicGain: null,
-  musicNodes: [],
-  musicTimer: null,
-  musicStep: 0,
+  musicTrack: null,
+  musicType: "",
+  lastGameTrack: -1,
   frameId: null
 };
 
@@ -242,60 +249,62 @@ function playTone(kind) {
 }
 
 function stopMusic() {
-  if (state.musicTimer) {
-    clearInterval(state.musicTimer);
-    state.musicTimer = null;
-  }
-  if (!state.audio || !state.musicGain) return;
-  const now = state.audio.currentTime;
-  state.musicGain.gain.cancelScheduledValues(now);
-  state.musicGain.gain.setTargetAtTime(0.0001, now, 0.07);
-  state.musicNodes.forEach((oscillator) => oscillator.stop(now + 0.32));
-  state.musicNodes = [];
-  state.musicGain = null;
+  if (!state.musicTrack) return;
+  state.musicTrack.pause();
+  state.musicTrack.currentTime = 0;
+  state.musicTrack = null;
+  state.musicType = "";
 }
 
-function pulseMusic() {
-  if (!state.running || !state.musicGain || !state.sound) return;
-  const notes = [440, 554.37, 659.25, 554.37, 493.88, 659.25, 739.99, 659.25];
-  const audio = state.audio;
-  const now = audio.currentTime;
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
-  oscillator.type = "triangle";
-  oscillator.frequency.value = notes[state.musicStep % notes.length];
-  state.musicStep += 1;
-  gain.gain.setValueAtTime(0.23, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.29);
-  oscillator.connect(gain);
-  gain.connect(state.musicGain);
-  oscillator.start(now);
-  oscillator.stop(now + 0.3);
+function tryPlayMusic() {
+  if (!state.musicTrack || !state.sound) return;
+  const playback = state.musicTrack.play();
+  if (playback) playback.catch(() => {
+    // Browsers may wait for the first interaction before allowing menu music.
+  });
+}
+
+function setMusicTrack(source, type, volume) {
+  stopMusic();
+  if (!state.sound) return;
+  state.musicTrack = new Audio(source);
+  state.musicTrack.loop = true;
+  state.musicTrack.preload = "auto";
+  state.musicTrack.volume = volume;
+  state.musicType = type;
+  tryPlayMusic();
+}
+
+function startMenuMusic() {
+  if (state.running || !state.sound) return;
+  if (state.musicType === "menu" && state.musicTrack) {
+    tryPlayMusic();
+    return;
+  }
+  setMusicTrack(MUSIC.menu, "menu", 0.3);
+}
+
+function pickGameTrack() {
+  let index = Math.floor(Math.random() * MUSIC.game.length);
+  while (MUSIC.game.length > 1 && index === state.lastGameTrack) {
+    index = Math.floor(Math.random() * MUSIC.game.length);
+  }
+  state.lastGameTrack = index;
+  return MUSIC.game[index];
 }
 
 function startMusic() {
-  if (!state.running || !state.sound) return;
-  stopMusic();
-  const audio = ensureAudio();
-  if (!audio) return;
-  state.musicGain = audio.createGain();
-  state.musicGain.gain.setValueAtTime(0.0001, audio.currentTime);
-  state.musicGain.gain.linearRampToValueAtTime(0.14, audio.currentTime + 0.45);
-  state.musicGain.connect(audio.destination);
-  state.musicNodes = [110, 164.81].map((pitch, index) => {
-    const oscillator = audio.createOscillator();
-    const gain = audio.createGain();
-    oscillator.type = index ? "triangle" : "sine";
-    oscillator.frequency.value = pitch;
-    gain.gain.value = index ? 0.1 : 0.15;
-    oscillator.connect(gain);
-    gain.connect(state.musicGain);
-    oscillator.start();
-    return oscillator;
-  });
-  state.musicStep = 0;
-  pulseMusic();
-  state.musicTimer = setInterval(pulseMusic, state.speedBoosted ? 280 : 380);
+  if ((!state.running && !state.pausedForRules) || !state.sound) return;
+  setMusicTrack(pickGameTrack(), "game", 0.36);
+  if (state.pausedForRules) pauseMusic();
+}
+
+function pauseMusic() {
+  if (state.musicTrack) state.musicTrack.pause();
+}
+
+function resumeMusic() {
+  if (state.sound && state.musicTrack) tryPlayMusic();
 }
 
 function getPad(index) {
@@ -474,6 +483,7 @@ function goToMenu() {
   elements.result.classList.add("hidden");
   elements.rivalBoard.classList.add("hidden");
   elements.launchCountdown.classList.add("hidden");
+  startMenuMusic();
 }
 
 function openRules(launch) {
@@ -481,7 +491,7 @@ function openRules(launch) {
   if (state.running && !launch) {
     state.pausedForRules = true;
     state.running = false;
-    stopMusic();
+    pauseMusic();
   }
   elements.briefing.classList.remove("hidden");
 }
@@ -492,7 +502,7 @@ function closeRules() {
     state.running = true;
     state.pausedForRules = false;
     state.lastFrame = performance.now();
-    startMusic();
+    resumeMusic();
   }
 }
 
@@ -554,7 +564,6 @@ function testLanding(index) {
     applyZone(state.score);
     setAiMessage("MAGENTA STORM: после 10 башен поток ускорен. Держи ритм!");
     playTone("boost");
-    startMusic();
   } else if (state.score > 0 && state.score % 10 === 0) {
     applyZone(state.score);
     setAiMessage(`${ZONES[state.zone].name}: среда перестроена после ${state.score} башен.`);
@@ -901,7 +910,11 @@ elements.soundButton.addEventListener("click", () => {
   elements.soundButton.setAttribute("aria-pressed", String(state.sound));
   if (state.sound) {
     playTone("rotate");
-    startMusic();
+    if (state.running || state.pausedForRules) {
+      startMusic();
+    } else {
+      startMenuMusic();
+    }
   } else {
     stopMusic();
   }
@@ -939,11 +952,14 @@ window.addEventListener("keydown", (event) => {
   }
 });
 window.addEventListener("resize", resizeCanvas);
+window.addEventListener("pointerdown", startMenuMusic, { once: true, capture: true });
+window.addEventListener("keydown", startMenuMusic, { once: true, capture: true });
 
 resizeCanvas();
 elements.pilotName.value = loadPilot();
 selectMode(state.mode);
 renderLeaderboard();
 getPad(0);
+startMenuMusic();
 state.lastFrame = performance.now();
 state.frameId = requestAnimationFrame(frame);
